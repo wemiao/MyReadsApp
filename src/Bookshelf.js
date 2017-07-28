@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import { Link } from 'react-router-dom'
 import BookshelfTitle from './BookshelfTitle'
+import ShelfSelect from './ShelfSelect'
 
 class Bookshelf extends Component {
     render() {
@@ -19,25 +20,23 @@ class Bookshelf extends Component {
                                                 <div className="book-top">
                                                     <div className="book-cover" style={{ width: 128, height: 193, backgroundImage: `url(${book.imageLinks.thumbnail})`}}>
                                                     </div>
-                                                    <div className="book-shelf-changer">
-                                                        <select value={shelf} onChange={(event) => onChangeShelf(event, book)}>
-                                                            <option value="none" disabled>Move to...</option>
-                                                            <option value="currentlyReading">Currently Reading</option>
-                                                            <option value="wantToRead">Want to Read</option>
-                                                            <option value="read">Read</option>
-                                                            <option value="none">None</option>
-                                                        </select>
-                                                    </div>
+                                                    <ShelfSelect 
+                                                        shelf={shelf}
+                                                        changeShelf={(event) => onChangeShelf(event, book)}
+                                                    />
                                                 </div>
                                             </div>
                                         </li>
                                     ))}
-                        
                                 </ol>
                             </div>
                         </div>
                     </div>
                 </div>
+                <div className="open-search">
+                    <a href="http://www.google.com">Add a book</a>
+                </div>
+
             </div>
         )
     }
