@@ -49,6 +49,11 @@ class BooksApp extends Component {
                         />
                     </div>
                 )}/>
+                <Route exact path="/search" render={() => (
+                    <div>
+
+                    </div>
+                )}/>
             </div>
         )
     }

@@ -33,8 +33,9 @@ class Bookshelf extends Component {
                         </div>
                     </div>
                 </div>
-                <div className="open-search">
-                    <a href="http://www.google.com">Add a book</a>
+                <div class="open-search">
+                <Link
+                    to="/search">Search</Link>
                 </div>
 
             </div>
