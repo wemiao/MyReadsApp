@@ -33,11 +33,10 @@ class Bookshelf extends Component {
                         </div>
                     </div>
                 </div>
-                <div class="open-search">
-                <Link
-                    to="/search">Search</Link>
+                <div className="open-search">
+                    <Link
+                        to="/search">Add a book</Link>
                 </div>
-
             </div>
         )
     }
