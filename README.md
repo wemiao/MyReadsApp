@@ -7,9 +7,13 @@
 * npm start
 
 ## General structure of components
-App --- ListBooks --- Bookshelf --- ShelfSelect
-   \            \--- BookTitle
-    \---Search --- ShelfSelect
+```
+App --- ListBooks --- Bookshelf --- BookshelfTitle
+ |                             \
+ |                              \--- ShelfSelect
+ |
+Search --- ShelfSelect
+```
 
 ## Backend Server
 
