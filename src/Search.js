@@ -6,9 +6,21 @@ import ShelfSelect from './ShelfSelect'
 
 class Search extends Component {
     state = {
-        books: [],
         searchBooks: [],
         query: ''
+    }
+
+    mergeSearchAndBookshelf = (searchBooks, books) => {
+        let diff = _.differenceBy(searchBooks, books, 'id').map((book) => {
+            let obj = book;
+            obj.shelf = "none"
+            return obj 
+        })
+
+        let intersection = _.intersectionBy(books, searchBooks,  'id')
+
+        let result = intersection.concat(diff)
+        this.setState({ searchBooks: result })
     }
 
     updateQuery = (query) => {
@@ -16,7 +28,7 @@ class Search extends Component {
         if(query) { // only query on nonempty string
             BooksAPI.search(query).then((searchBooks) => {
                 if(searchBooks.error !== "empty query") {
-                    this.setState({ searchBooks })
+                    this.mergeSearchAndBookshelf(searchBooks, this.props.books)
                 } else {
                     this.setState({ searchBooks: [] })
                 }
@@ -26,18 +38,17 @@ class Search extends Component {
         }
     } 
 
-    onChangeShelf = (event, book) => {
-        console.log(book)
+    changeShelf = (event, book) => {
+        this.props.onChangeShelf(event, book)
         BooksAPI.update(book, event.target.value).then((res) => {
-            console.log(res)
             BooksAPI.getAll().then((books) => {
-                this.setState({ books })
+                this.mergeSearchAndBookshelf(this.state.searchBooks, books)
             })
         })
     }
 
     render() {
-        const { books, searchBooks, query } = this.state
+        const { searchBooks, query } = this.state
         // remove books with no thumbnails, as there would be no way to properly identify them in the
         // current interface
         let curBooks = searchBooks.filter((book) => {
@@ -71,7 +82,7 @@ class Search extends Component {
                                             </div>
                                             <ShelfSelect 
                                                 shelf={book.shelf}
-                                                changeShelf={(event) => this.onChangeShelf(event, book)}
+                                                changeShelf={(event) => this.changeShelf(event, book)}
                                             />
                                         </div>
                                     </div>
