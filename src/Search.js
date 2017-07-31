@@ -1,52 +1,85 @@
 import React, { Component } from 'react';
 import { Link } from 'react-router-dom'
-import BookshelfTitle from './BookshelfTitle'
+import _ from 'lodash'
+import * as BooksAPI from './BooksAPI'
+import ShelfSelect from './ShelfSelect'
 
 class Search extends Component {
     state = {
-        shelf: this.props.shelf 
+        books: [],
+        searchBooks: [],
+        query: ''
     }
 
-    handleChange = (event, key) => {
-        console.log(event.target.value);
-        console.log(key);
+    updateQuery = (query) => {
+        this.setState({ query: query.trimLeft() })
+        if(query) { // only query on nonempty string
+            BooksAPI.search(query).then((searchBooks) => {
+                if(searchBooks.error !== "empty query") {
+                    this.setState({ searchBooks })
+                } else {
+                    this.setState({ searchBooks: [] })
+                }
+            })
+        } else {
+            this.setState({ searchBooks: [] })
+        }
+    } 
+
+    onChangeShelf = (event, book) => {
+        console.log(book)
+        BooksAPI.update(book, event.target.value).then((res) => {
+            console.log(res)
+            BooksAPI.getAll().then((books) => {
+                this.setState({ books })
+            })
+        })
     }
 
     render() {
-        const { shelf, books, onChangeShelf } = this.props
+        const { books, searchBooks, query } = this.state
+        // remove books with no thumbnails, as there would be no way to properly identify them in the
+        // current interface
+        let curBooks = searchBooks.filter((book) => {
+            return book.hasOwnProperty('imageLinks') 
+        })
+        // filter by unique id to remove object duplicates
+        curBooks = _.uniqBy(curBooks, 'id');
         return (
-            <div className="list-books">
-                <div className="list-books-content">
-                    <div>
-                        <div className="bookshelf">
-                            <BookshelfTitle shelf={shelf}/>
-                            <div className="bookshelf-books">
-                                <ol className="books-grid">
-                                    {books.map((book) => (
-                                        <li key={book.id}>
-                                            <div className="book">
-                                                <div className="book-top">
-                                                    <div className="book-cover" style={{ width: 128, height: 193, backgroundImage: `url(${book.imageLinks.thumbnail})`}}>
-                                                    </div>
-                                                    <div className="book-shelf-changer">
-                                                        <select value={this.state.shelf} onChange={(event) => onChangeShelf(event, book)}>
-                                                            <option value="none" disabled>Move to...</option>
-                                                            <option value="currentlyReading">Currently Reading</option>
-                                                            <option value="wantToRead">Want to Read</option>
-                                                            <option value="read">Read</option>
-                                                            <option value="none">None</option>
-                                                        </select>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </li>
-                                    ))}
-                        
-                                </ol>
-                            </div>
-                        </div>
+            <div className="search-books">
+                <div className="search-books-bar">
+                    <Link  
+                        to="/"
+                        className="close-search">Close</Link>
+                    <div className="search-books-input-wrapper">
+                        <input 
+                            type="text"
+                            placeholder="Search by title or author"
+                            value={query}
+                            onChange={(event) => this.updateQuery(event.target.value)}
+                        />
                     </div>
                 </div>
+                if(books) {
+                    <div className="search-books-results">     
+                        <ol className="books-grid">
+                            {curBooks.map((book) => (
+                                <li key={book.id}>
+                                    <div className="book">
+                                        <div className="book-top">
+                                            <div className="book-cover" style={{ width: 128, height: 193, backgroundImage: `url(${book.imageLinks.thumbnail})`}}>
+                                            </div>
+                                            <ShelfSelect 
+                                                shelf={book.shelf}
+                                                changeShelf={(event) => this.onChangeShelf(event, book)}
+                                            />
+                                        </div>
+                                    </div>
+                                </li>
+                            ))}
+                        </ol>
+                    </div>
+                }
             </div>
         )
     }
