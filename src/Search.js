@@ -1,6 +1,5 @@
 import React, { Component } from 'react';
 import { Link } from 'react-router-dom'
-import _ from 'lodash'
 import * as BooksAPI from './BooksAPI'
 import ShelfSelect from './ShelfSelect'
 
@@ -10,17 +9,31 @@ class Search extends Component {
         query: ''
     }
 
+    inBookshelf = (books, book) => {
+        for(let shelfBook of books) {
+            if(book.id === shelfBook.id) {
+                return shelfBook.shelf
+            }
+        }
+        return "none"
+    }
+
     mergeSearchAndBookshelf = (searchBooks, books) => {
-        let diff = _.differenceBy(searchBooks, books, 'id').map((book) => {
+        let result = searchBooks.map((book) => {
             let obj = book;
-            obj.shelf = "none"
-            return obj 
+            obj.shelf = this.inBookshelf(books, book)
+            return obj
         })
-
-        let intersection = _.intersectionBy(books, searchBooks,  'id')
-
-        let result = intersection.concat(diff)
         this.setState({ searchBooks: result })
+    }
+
+    isUnique = (book, curBooks, idx) => {
+        for(let [i, curBook] of curBooks.entries()) {
+            if (curBook.id === book.id) {
+                return i === idx
+            }
+        }
+        return true
     }
 
     updateQuery = (query) => {
@@ -49,13 +62,13 @@ class Search extends Component {
 
     render() {
         const { searchBooks, query } = this.state
-        // remove books with no thumbnails, as there would be no way to properly identify them in the
-        // current interface
-        let curBooks = searchBooks.filter((book) => {
-            return book.hasOwnProperty('imageLinks') 
-        })
+        // filter out no thumbnail images
+        //let curBooks = searchBooks.filter((book) => {
+        //    return book.hasOwnProperty('imageLinks') 
+        //})
         // filter by unique id to remove object duplicates
-        curBooks = _.uniqBy(curBooks, 'id');
+        let curBooks = searchBooks.filter((book, idx) => this.isUnique(book, searchBooks, idx))
+        //curBooks = 
         return (
             <div className="search-books">
                 <div className="search-books-bar">
@@ -71,20 +84,22 @@ class Search extends Component {
                         />
                     </div>
                 </div>
-                if(books) {
+                if(searchBooks) {
                     <div className="search-books-results">     
                         <ol className="books-grid">
                             {curBooks.map((book) => (
                                 <li key={book.id}>
                                     <div className="book">
                                         <div className="book-top">
-                                            <div className="book-cover" style={{ width: 128, height: 193, backgroundImage: `url(${book.imageLinks.thumbnail})`}}>
+                                            <div className="book-cover" style={{ width: 128, height: 193, backgroundImage: `url(${book.imageLinks ? book.imageLinks.thumbnail : ''})`}}>
                                             </div>
                                             <ShelfSelect 
                                                 shelf={book.shelf}
                                                 changeShelf={(event) => this.changeShelf(event, book)}
                                             />
                                         </div>
+                                        <div className="book-title">{book.title}</div>
+                                        <div className="book-authors">{book.authors ? book.authors.join(', ') : ''}</div>
                                     </div>
                                 </li>
                             ))}
