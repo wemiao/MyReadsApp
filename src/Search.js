@@ -62,13 +62,10 @@ class Search extends Component {
 
     render() {
         const { searchBooks, query } = this.state
-        // filter out no thumbnail images
-        //let curBooks = searchBooks.filter((book) => {
-        //    return book.hasOwnProperty('imageLinks') 
-        //})
+
         // filter by unique id to remove object duplicates
         let curBooks = searchBooks.filter((book, idx) => this.isUnique(book, searchBooks, idx))
-        //curBooks = 
+
         return (
             <div className="search-books">
                 <div className="search-books-bar">
